@@ -18,28 +18,44 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Upload code to ECS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.ECS_HOST }}
-          username: ${{ secrets.ECS_USER }}
-          key: ${{ secrets.ECS_SSH_KEY }}
-          port: 22
-          # 不上传 .env.production / data / chroma / app.db，线上数据与密钥留在服务器
-          source: "Dockerfile,docker-compose.yml,requirements.txt,README.md,app,scripts"
-          target: /opt/ai-workbench
-          overwrite: true
+      - name: Deploy to ECS
+        env:
+          ECS_HOST: ${{ secrets.ECS_HOST }}
+          ECS_USER: ${{ secrets.ECS_USER }}
+          ECS_SSH_KEY: ${{ secrets.ECS_SSH_KEY }}
+        run: |
+          set -euo pipefail
 
-      - name: Build and restart
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.ECS_HOST }}
-          username: ${{ secrets.ECS_USER }}
-          key: ${{ secrets.ECS_SSH_KEY }}
-          port: 22
-          command_timeout: 40m
-          script: |
-            set -euo pipefail
-            cd /opt/ai-workbench
-            test -f .env.production || { echo "缺少 .env.production，请先在服务器配置"; exit 1; }
-            bash scripts/remote-rebuild.sh
+          if [ -z "${ECS_HOST:-}" ] || [ -z "${ECS_USER:-}" ] || [ -z "${ECS_SSH_KEY:-}" ]; then
+            echo "::error::缺少 Secrets。请配置 ECS_HOST / ECS_USER / ECS_SSH_KEY"
+            exit 1
+          fi
+
+          mkdir -p ~/.ssh
+          printf '%s\n' "$ECS_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          echo "测试 SSH 连通 ${ECS_USER}@${ECS_HOST}:22 ..."
+          ssh-keyscan -T 10 -H "$ECS_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+          if ! ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
+              -o ConnectTimeout=15 "${ECS_USER}@${ECS_HOST}" "echo ssh_ok"; then
+            echo "::error::SSH 失败。请检查：1) ECS_SSH_KEY 是否为私钥全文 2) 安全组是否放行 TCP 22（0.0.0.0/0） 3) 公钥是否在服务器 authorized_keys"
+            exit 1
+          fi
+
+          echo "打包并上传代码..."
+          tar czf /tmp/ai-workbench.tgz \
+            Dockerfile docker-compose.yml requirements.txt README.md app scripts
+          scp -i ~/.ssh/deploy_key -o ConnectTimeout=15 \
+            /tmp/ai-workbench.tgz "${ECS_USER}@${ECS_HOST}:/tmp/ai-workbench.tgz"
+
+          echo "远端解压并重建..."
+          ssh -i ~/.ssh/deploy_key "${ECS_USER}@${ECS_HOST}" bash -s <<'REMOTE'
+          set -euo pipefail
+          mkdir -p /opt/ai-workbench
+          tar xzf /tmp/ai-workbench.tgz -C /opt/ai-workbench
+          rm -f /tmp/ai-workbench.tgz
+          cd /opt/ai-workbench
+          test -f .env.production || { echo "缺少 .env.production"; exit 1; }
+          bash scripts/remote-rebuild.sh
+          REMOTE
