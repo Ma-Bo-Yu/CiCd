@@ -19,3 +19,5 @@ tools/ffmpeg/bin/
 tools/ffmpeg/*.zip
 *.mp4
 *.MP4
+
+ecs_ssh_key_b64.txt

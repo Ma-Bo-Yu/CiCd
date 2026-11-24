@@ -32,21 +32,27 @@ jobs:
           fi
 
           mkdir -p ~/.ssh
-          printf '%s\n' "$ECS_SSH_KEY" > ~/.ssh/deploy_key
+          KEY_RAW=$(printf '%s' "$ECS_SSH_KEY" | tr -d '\r')
+          # 支持粘贴私钥原文，或 Base64（推荐，避免格式被破坏）
+          if printf '%s' "$KEY_RAW" | grep -q 'BEGIN .*PRIVATE KEY'; then
+            printf '%s\n' "$KEY_RAW" > ~/.ssh/deploy_key
+          else
+            printf '%s' "$KEY_RAW" | base64 -d > ~/.ssh/deploy_key
+          fi
           chmod 600 ~/.ssh/deploy_key
+          ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null
 
           echo "测试 SSH 连通 ${ECS_USER}@${ECS_HOST}:22 ..."
-          ssh-keyscan -T 10 -H "$ECS_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
           if ! ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
-              -o ConnectTimeout=15 "${ECS_USER}@${ECS_HOST}" "echo ssh_ok"; then
-            echo "::error::SSH 失败。请检查：1) ECS_SSH_KEY 是否为私钥全文 2) 安全组是否放行 TCP 22（0.0.0.0/0） 3) 公钥是否在服务器 authorized_keys"
+              -o ConnectTimeout=20 "${ECS_USER}@${ECS_HOST}" "echo ssh_ok"; then
+            echo "::error::SSH 认证失败。请更新 Secret ECS_SSH_KEY 为私钥 Base64（见本地 ecs_ssh_key_b64.txt），并确认服务器 authorized_keys 含对应公钥"
             exit 1
           fi
 
           echo "打包并上传代码..."
           tar czf /tmp/ai-workbench.tgz \
             Dockerfile docker-compose.yml requirements.txt README.md app scripts
-          scp -i ~/.ssh/deploy_key -o ConnectTimeout=15 \
+          scp -i ~/.ssh/deploy_key -o ConnectTimeout=20 \
             /tmp/ai-workbench.tgz "${ECS_USER}@${ECS_HOST}:/tmp/ai-workbench.tgz"
 
           echo "远端解压并重建..."
