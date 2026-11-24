@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<nav class="breadcrumb">
+  <a href="/kb">知识库</a> / {{ kb.name }}
+</nav>
+
+<div class="page-header row-header">
+  <div>
+    <h1>{{ kb.name }}</h1>
+    {% if kb.description %}
+    <p class="lead">{{ kb.description }}</p>
+    {% endif %}
+    <p class="muted small">创建于 {{ kb.created_at.strftime("%Y-%m-%d %H:%M") }}</p>
+  </div>
+  <form
+    method="post"
+    action="/kb/{{ kb.id }}/delete"
+    onsubmit="return confirm('确定删除该知识库及关联数据？');"
+  >
+    <button type="submit" class="btn danger">删除知识库</button>
+  </form>
+</div>
+
+<section class="card">
+  <h2>上传文档</h2>
+  <p class="muted small">支持 PDF、Markdown、纯文本</p>
+  <form
+    hx-post="/kb/{{ kb.id }}/upload"
+    hx-target="#doc-table"
+    hx-swap="innerHTML"
+    hx-encoding="multipart/form-data"
+    class="kb-form"
+  >
+    <input type="file" name="file" accept=".pdf,.md,.markdown,.txt" required>
+    <button type="submit" class="btn primary">上传并开始索引</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>文档列表</h2>
+  <div id="doc-table" hx-trigger="every 3s" hx-get="/kb/{{ kb.id }}/documents-fragment" hx-swap="outerHTML">
+    {% include "kb/partials/documents.html" %}
+  </div>
+</section>
+{% endblock %}

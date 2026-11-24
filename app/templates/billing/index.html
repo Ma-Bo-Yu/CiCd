@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>套餐与用量</h1>
+<p class="muted">演示级个人订阅：无真实支付。超额创建会被拦截并引导到本页升级。</p>
+
+{% if quota_msg %}
+<p class="flash flash-error" role="alert">{{ quota_msg }}</p>
+{% endif %}
+{% if request.query_params.get('upgraded') %}
+<p class="flash flash-success" role="status">已模拟开通专业版（{{ pro_days }} 天）。</p>
+{% endif %}
+{% if request.query_params.get('downgraded') %}
+<p class="flash flash-info" role="status">已恢复为免费版。</p>
+{% endif %}
+
+<section class="card">
+  <h2>当前套餐：{{ snap.plan_label }}</h2>
+  {% if snap.plan == 'pro' and snap.plan_expires_at %}
+  <p class="muted small">到期时间：{{ snap.plan_expires_at.strftime('%Y-%m-%d %H:%M') }}</p>
+  {% endif %}
+  <ul class="usage-list">
+    <li>
+      <span>知识库</span>
+      <strong>{{ snap.kb_count }} / {{ snap.limits.kb }}</strong>
+      <div class="progress-bar" aria-hidden="true"><div class="progress-bar-fill" style="width: {{ [100, (snap.kb_count / snap.limits.kb * 100)|int]|min }}%"></div></div>
+    </li>
+    <li>
+      <span>文档（合计）</span>
+      <strong>{{ snap.doc_count }} / {{ snap.limits.docs }}</strong>
+      <div class="progress-bar" aria-hidden="true"><div class="progress-bar-fill" style="width: {{ [100, (snap.doc_count / snap.limits.docs * 100)|int]|min }}%"></div></div>
+    </li>
+    <li>
+      <span>本月视频任务</span>
+      <strong>{{ snap.video_month }} / {{ snap.limits.video_month }}</strong>
+      <div class="progress-bar" aria-hidden="true"><div class="progress-bar-fill" style="width: {{ [100, (snap.video_month / snap.limits.video_month * 100)|int]|min }}%"></div></div>
+    </li>
+    <li>
+      <span>本月研究任务</span>
+      <strong>{{ snap.research_month }} / {{ snap.limits.research_month }}</strong>
+      <div class="progress-bar" aria-hidden="true"><div class="progress-bar-fill" style="width: {{ [100, (snap.research_month / snap.limits.research_month * 100)|int]|min }}%"></div></div>
+    </li>
+  </ul>
+</section>
+
+<section class="card-grid billing-grid">
+  <article class="card">
+    <h2>免费版</h2>
+    <p class="price">¥0 <span class="muted">/ 月</span></p>
+    <ul>
+      <li>知识库 {{ plans.free.kb }} 个</li>
+      <li>文档 {{ plans.free.docs }} 篇</li>
+      <li>每月视频 {{ plans.free.video_month }} 个</li>
+      <li>每月研究 {{ plans.free.research_month }} 个</li>
+    </ul>
+    {% if snap.plan == 'pro' %}
+    <form method="post" action="/billing/downgrade">
+      <button type="submit" class="btn">恢复免费版</button>
+    </form>
+    {% else %}
+    <p class="muted small">当前方案</p>
+    {% endif %}
+  </article>
+  <article class="card card-accent">
+    <h2>专业版</h2>
+    <p class="price">¥{{ pro_price }} <span class="muted">/ 月（模拟）</span></p>
+    <ul>
+      <li>知识库 {{ plans.pro.kb }} 个</li>
+      <li>文档 {{ plans.pro.docs }} 篇</li>
+      <li>每月视频 {{ plans.pro.video_month }} 个</li>
+      <li>每月研究 {{ plans.pro.research_month }} 个</li>
+    </ul>
+    {% if snap.plan == 'pro' %}
+    <p class="muted small">已开通</p>
+    {% else %}
+    <form method="post" action="/billing/upgrade">
+      <button type="submit" class="btn primary">模拟开通专业版（{{ pro_days }} 天）</button>
+    </form>
+    {% endif %}
+  </article>
+</section>
+
+<p class="muted small">说明：本页仅用于产品与答辩演示，不接入微信/支付宝等真实支付。</p>
+{% endblock %}

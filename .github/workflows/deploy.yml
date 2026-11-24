@@ -1,0 +1,45 @@
+# 推送到 master/main → 同步代码到阿里云 ECS → 重建并重启容器
+name: Deploy to Aliyun ECS
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-aliyun
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Upload code to ECS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          port: 22
+          # 不上传 .env.production / data / chroma / app.db，线上数据与密钥留在服务器
+          source: "Dockerfile,docker-compose.yml,requirements.txt,README.md,app,scripts"
+          target: /opt/ai-workbench
+          overwrite: true
+
+      - name: Build and restart
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.ECS_HOST }}
+          username: ${{ secrets.ECS_USER }}
+          key: ${{ secrets.ECS_SSH_KEY }}
+          port: 22
+          command_timeout: 40m
+          script: |
+            set -euo pipefail
+            cd /opt/ai-workbench
+            test -f .env.production || { echo "缺少 .env.production，请先在服务器配置"; exit 1; }
+            bash scripts/remote-rebuild.sh

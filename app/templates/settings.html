@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>设置</h1>
+
+<section class="card">
+  <h2>套餐与用量</h2>
+  <p>当前：<strong>{{ snap.plan_label }}</strong>
+    · 知识库 {{ snap.kb_count }}/{{ snap.limits.kb }}
+    · 文档 {{ snap.doc_count }}/{{ snap.limits.docs }}
+    · 本月视频 {{ snap.video_month }}/{{ snap.limits.video_month }}
+    · 本月研究 {{ snap.research_month }}/{{ snap.limits.research_month }}
+  </p>
+  <p><a class="btn" href="/billing">管理套餐</a></p>
+</section>
+
+<section class="card">
+  <h2>模型配置（来自 .env）</h2>
+  <ul>
+    <li>LLM：<code>{{ llm_model }}</code> {% if llm_demo %}<span class="badge">演示模式</span>{% endif %}</li>
+    <li>Embedding：<code>{{ embed_model }}</code> {% if embed_demo %}<span class="badge">本地向量</span>{% endif %}</li>
+    <li>TTS：<code>{{ tts_provider }}</code></li>
+  </ul>
+</section>
+
+<section class="card">
+  <h2>架构示意</h2>
+  <pre class="arch-diagram">浏览器 (Jinja2 + HTMX)
+    ↓
+FastAPI 后端
+    ├─ MySQL / SQLite（用户 / 会话 / 任务 / 用量）
+    ├─ Chroma（向量检索）
+    ├─ LLM / Embedding API（.env）
+    └─ FFmpeg + TTS（讲解视频）</pre>
+</section>
+
+<section class="card">
+  <h2>免责声明</h2>
+  <p>本工作台生成的问答、讲稿、视频旁白、研究报告等内容均由 AI 生成，仅供学习演示。请自行核对事实，勿直接用于正式教学或出版而不经人工审核。</p>
+</section>
+
+<section class="card">
+  <h2>演示数据</h2>
+  <p class="muted small">导入会占用当前账号的知识库与文档配额。</p>
+  <button type="button" class="btn primary" data-seed-demo>导入理论题示例资料</button>
+</section>
+{% endblock %}

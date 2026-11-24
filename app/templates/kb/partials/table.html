@@ -1,0 +1,37 @@
+{% if knowledge_bases %}
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>名称</th>
+      <th>描述</th>
+      <th>文档数</th>
+      <th>创建时间</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for kb in knowledge_bases %}
+    <tr>
+      <td><a href="/kb/{{ kb.id }}">{{ kb.name }}</a></td>
+      <td class="muted-cell">{{ kb.description or "—" }}</td>
+      <td>{{ doc_counts.get(kb.id, 0) if doc_counts is defined else 0 }}</td>
+      <td>{{ kb.created_at.strftime("%Y-%m-%d %H:%M") if kb.created_at else "—" }}</td>
+      <td class="actions">
+        <a href="/kb/{{ kb.id }}">详情</a>
+        <form
+          class="inline-form"
+          hx-post="/kb/{{ kb.id }}/delete"
+          hx-target="#kb-table"
+          hx-swap="innerHTML"
+          hx-confirm="确定删除该知识库？"
+        >
+          <button type="submit" class="btn-link danger">删除</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty-state">暂无知识库，请在上方创建第一个。</p>
+{% endif %}

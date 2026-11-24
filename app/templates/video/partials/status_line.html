@@ -1,0 +1,13 @@
+{% set labels = {
+  'draft': ('草稿', 'status-draft'),
+  'pending': ('排队中', 'status-processing'),
+  'running': ('渲染中', 'status-processing'),
+  'succeeded': ('已完成', 'status-indexed'),
+  'failed': ('失败', 'status-failed'),
+  'partial': ('部分完成', 'status-processing')
+} %}
+{% set pair = labels.get(job.status, (job.status, 'status-draft')) %}
+<span class="job-status-badge badge {{ pair[1] }}">{{ pair[0] }}</span>
+{% if job.error_message and job.status == 'failed' %}
+<span class="danger-text job-status-error">{{ job.error_message }}</span>
+{% endif %}

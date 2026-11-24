@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>讲解视频</h1>
+<p class="lead">基于知识库生成讲稿，确认后异步渲染 mp4。</p>
+
+<section class="card form-card">
+  <h2>新建视频任务</h2>
+  {% if not knowledge_bases %}
+  <p class="empty-state">请先创建知识库。</p>
+  {% else %}
+  <form method="post" action="/video" class="kb-form">
+    <label>知识库
+      <select name="kb_id" required>
+        {% for kb in knowledge_bases %}
+        <option value="{{ kb.id }}">{{ kb.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>主题
+      <input type="text" name="topic" required placeholder="例如：装饰器应用场景讲解">
+    </label>
+    <label>目标时长（分钟）
+      <select name="target_minutes">
+        <option value="3">3</option>
+        <option value="5">5</option>
+        <option value="8">8</option>
+      </select>
+    </label>
+    <button type="submit" class="btn primary">生成讲稿</button>
+  </form>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>任务列表</h2>
+  {% if jobs %}
+  <table class="data-table">
+    <thead>
+      <tr><th>主题</th><th>状态</th><th>创建时间</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for job in jobs %}
+      <tr>
+        <td>{{ job.topic }}</td>
+        <td>{{ job.status }}</td>
+        <td>{{ job.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+        <td><a href="/video/{{ job.id }}">打开</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-state">暂无视频任务。</p>
+  {% endif %}
+</section>
+{% endblock %}

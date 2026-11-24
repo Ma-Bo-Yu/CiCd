@@ -1,0 +1,11 @@
+<ul class="session-list">
+  {% for s in sessions %}
+  <li>
+    <a
+      href="{{ list_base }}?kb_id={{ kb_id }}&amp;session_id={{ s.id }}"
+      {% if current_session and s.id == current_session.id %}class="active"{% endif %}
+      title="{{ (session_labels|default({})).get(s.id, s.title) }}"
+    >{{ (session_labels|default({})).get(s.id, s.title) }}</a>
+  </li>
+  {% endfor %}
+</ul>

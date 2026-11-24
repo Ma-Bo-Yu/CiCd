@@ -1,0 +1,7 @@
+{% for item in nav_items %}
+<a
+  href="{{ item.href }}"
+  class="nav-link{% if item.active %} is-active{% endif %}"
+  {% if item.active %}aria-current="page"{% endif %}
+>{{ item.label }}</a>
+{% endfor %}

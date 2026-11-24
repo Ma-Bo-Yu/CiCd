@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>研究任务</h1>
+<p class="lead">在知识库内多步检索并生成 Markdown 研究报告（ReAct 有限步数）。</p>
+
+<section class="card form-card">
+  <h2>新建研究</h2>
+  {% if knowledge_bases %}
+  <form method="post" action="/research" class="kb-form">
+    <label>知识库
+      <select name="kb_id" required>
+        {% for kb in knowledge_bases %}
+        <option value="{{ kb.id }}">{{ kb.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>研究主题
+      <input type="text" name="topic" required placeholder="例如：Python 装饰器面试要点梳理">
+    </label>
+    <button type="submit" class="btn primary">开始研究</button>
+  </form>
+  {% else %}
+  <p class="empty-state">请先创建知识库。</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>任务列表</h2>
+  {% if job_rows %}
+  <table class="data-table">
+    <thead><tr><th>主题</th><th>状态</th><th>入库</th><th>时间</th><th></th></tr></thead>
+    <tbody>
+      {% for row in job_rows %}
+      <tr>
+        <td>{{ row.job.topic }}</td>
+        <td>{{ row.job.status }}</td>
+        <td>
+          {% if row.ingested_doc %}
+          <span class="tag tag-ok" title="{{ row.ingested_doc.filename }}">库中已有</span>
+          {% else %}
+          <span class="muted">—</span>
+          {% endif %}
+        </td>
+        <td>{{ row.job.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+        <td><a href="/research/{{ row.job.id }}">详情</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-state">暂无研究任务。</p>
+  {% endif %}
+</section>
+{% endblock %}

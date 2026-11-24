@@ -1,0 +1,22 @@
+{% include "video/partials/progress_inner.html" %}
+
+<div id="job-status-line" hx-swap-oob="innerHTML">
+  {% include "video/partials/status_line.html" %}
+</div>
+
+{% if job.status not in ['pending', 'running'] %}
+<div id="job-progress" class="card render-panel progress-wrap" hx-swap-oob="outerHTML">
+  <h2 class="render-panel-title">渲染结果</h2>
+  <div id="job-progress-body">
+    {% include "video/partials/progress_inner.html" %}
+  </div>
+</div>
+<span id="render-btn-state" hx-swap-oob="innerHTML">
+  <button
+    type="submit"
+    id="render-btn"
+    class="btn primary"
+    {% if not job.script_confirmed %}disabled{% endif %}
+  >确认并渲染</button>
+</span>
+{% endif %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block main_class %} page-chat{% endblock %}
+
+{% block content %}
+<header class="page-header">
+  <h1>知识库问答</h1>
+  <p class="lead">仅根据<strong>当前知识库</strong>检索作答；库内无相关内容时不回答，请前往 <a href="/chat/ai">AI 对话</a>。</p>
+</header>
+
+{% if not knowledge_bases %}
+<p class="empty-state">请先 <a href="/kb">创建知识库</a> 并上传文档。</p>
+{% else %}
+<div class="chat-layout">
+  <aside class="chat-sidebar card">
+    <form method="get" action="/chat" class="kb-form">
+      <label>知识库
+        <select name="kb_id" onchange="this.form.submit()">
+          {% for kb in knowledge_bases %}
+          <option value="{{ kb.id }}" {% if kb.id == kb_id %}selected{% endif %}>{{ kb.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </form>
+    <form method="post" action="/chat/sessions">
+      <input type="hidden" name="kb_id" value="{{ kb_id }}">
+      <button type="submit" class="btn primary full-width">新对话</button>
+    </form>
+    {% set list_base = "/chat" %}
+    {% include "chat/partials/session_list.html" %}
+  </aside>
+
+  <section class="chat-main card">
+    {% if current_session %}
+    <div id="message-list" class="message-list">
+      {% include "chat/partials/messages.html" %}
+    </div>
+    <form
+      class="chat-input"
+      data-stream-url="/chat/sessions/{{ current_session.id }}/messages/stream"
+      data-messages-url="/chat/sessions/{{ current_session.id }}/messages-fragment"
+      action="/chat/sessions/{{ current_session.id }}/messages/stream"
+      method="post"
+    >
+      <input type="text" name="content" placeholder="例如：RAG 和微调怎么选？（仅根据当前知识库作答）" required autocomplete="off">
+      <button type="submit" class="btn primary">发送</button>
+    </form>
+    {% else %}
+    <p class="empty-state">点击「新对话」开始问答。</p>
+    {% endif %}
+  </section>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/chat-stream.js?v=11"></script>
+<script>window.bootChatStream && window.bootChatStream();</script>
+{% endblock %}

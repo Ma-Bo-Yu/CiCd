@@ -1,0 +1,38 @@
+AI_面试题_口语背诵版.md
+c24878d5-ac97-41c6-8cc7-b78af1e1add3
+
+=== 0 ===
+# 面试题整理（含核心回答思路提示） > 版本：v2.0 扩展美化版 ｜ 基于 v1.0（204 题）新增 9 道高频题，并为全部 213 题补充"结合项目经验的核心回答思路" ---
+
+=== 1 ===
+## 使用说明 - **问题**：<span style="color:#1565C0">**蓝色加粗**</span> 显示，一眼与答案区分。 - **核心回答思路**：<span style="color:#2E7D32">**绿色引用块**</span> 显示，每道题 2-3 个要点，均结合 AI 应用开发（RAG 知识库 / Agent / 多租户 SaaS）真实项目经验撰写，可直接作为面试话术。 - **重要程度**：每个梯队标题带 **进度条 + 彩色徽章**；每道题带**彩色等级徽章**（必考 / 高频 / 重点 / 熟悉 / 了解 / 场景 / 低频），比原版星星更醒目、一眼可辨优先级。 - **新增题**：标注 <span style="color:#E65100">**【新增】**</span>，已按主题插入对应梯队，不改变原梯队结构与题目顺序。 - **备考建议**：按徽章颜色分配精力，必考（红）> 高频（橙）> 重点（黄）> 熟悉（绿）> 了解（蓝）> 场景（紫）> 低频（灰）。 | 梯队 | 进度条 | 徽章 | 优先级 | |---|---|---|---|
+
+=== 2 ===
+按徽章颜色分配精力，必考（红）> 高频（橙）> 重点（黄）> 熟悉（绿）> 了解（蓝）> 场景（紫）> 低频（灰）。 | 梯队 | 进度条 | 徽章 | 优先级 | |---|---|---|---| | 第一梯队 | <span style="color:#E53935">▓▓▓▓▓▓▓▓▓▓</span> | <span style="background:#E53935;color:#fff;padding:1px 10px;border-radius:10px">★★★★★ 必考</span> | 最高 | | 第二梯队 | <span style="color:#FB8C00">▓▓▓▓▓▓▓▓░░</span> | <span style="background:#FB8C00;color:#fff;padding:1px 10px;border-radius:10px">★★★★☆ 高频</span> | 很高 | | 第三梯队 | <span style="color:#FDD835">▓▓▓▓▓▓░░░░</span> | <span style="backgroun
+
+=== 3 ===
+★★☆ 高频</span> | 很高 | | 第三梯队 | <span style="color:#FDD835">▓▓▓▓▓▓░░░░</span> | <span style="background:#FDD835;color:#333;padding:1px 10px;border-radius:10px">★★★☆☆ 重点</span> | 高 | | 第四梯队 | <span style="color:#FDD835">▓▓▓▓▓▓░░░░</span> | <span style="background:#FDD835;color:#333;padding:1px 10px;border-radius:10px">★★★☆☆ 重点</span> | 高 | | 第五梯队 | <span style="color:#43A047">▓▓▓▓▓▓░░░░</span> | <span style="background:#43A047;color:#fff;padding:1px 10px;border-radius:10px">★★★☆☆ 熟悉</span> | 中 | | 
+
+=== 4 ===
+n style="background:#43A047;color:#fff;padding:1px 10px;border-radius:10px">★★★☆☆ 熟悉</span> | 中 | | 第六梯队 | <span style="color:#43A047">▓▓▓▓▓▓░░░░</span> | <span style="background:#43A047;color:#fff;padding:1px 10px;border-radius:10px">★★★☆☆ 熟悉</span> | 中 | | 第七梯队 | <span style="color:#1E88E5">▓▓▓▓░░░░░░</span> | <span style="background:#1E88E5;color:#fff;padding:1px 10px;border-radius:10px">★★☆☆☆ 了解</span> | 中低 | | 第八梯队 | <span style="color:#1E88E5">▓▓▓▓░░░░░░</span> | <span style="background:#1
+
+=== 5 ===
+了解</span> | 中低 | | 第八梯队 | <span style="color:#1E88E5">▓▓▓▓░░░░░░</span> | <span style="background:#1E88E5;color:#fff;padding:1px 10px;border-radius:10px">★★☆☆☆ 了解</span> | 中低 | | 第九梯队 | <span style="color:#8E24AA">▓▓▓▓░░░░░░</span> | <span style="background:#8E24AA;color:#fff;padding:1px 10px;border-radius:10px">★★☆☆☆ 场景</span> | 中低 | | 第十梯队 | <span style="color:#757575">▓▓░░░░░░░░</span> | <span style="background:#757575;color:#fff;padding:1px 10px;border-radius:10px">★☆☆☆☆ 低频</span> | 低 | ---
+
+=== 6 ===
+## <span style="color:#E53935">▓▓▓▓▓▓▓▓▓▓</span> 第一梯队：AI 应用开发核心（必考高频） <span style="background:#E53935;color:#fff;padding:2px 12px;border-radius:12px;font-size:14px">★★★★★ 最高优先级</span>
+
+=== 7 ===
+### RAG 相关 **<span style="color:#1565C0">1. RAG知识库 PDF 等文档是怎么进行入库的？</span>** <span style="background:#E53935;color:#fff;padding:1px 8px;border-radius:8px;font-size:12px">必考</span> > <span style="color:#2E7D32">**先说结论：** 第一， 解析层：PDF 按页/章节解析，扫描件走 OCR（PaddleOCR），表格转 Markdown 结构化，保留标题层级。 第二， 分块层：按语义切块（标题+段落），设 10% 重叠，块大小对齐 embedding 模型窗口。 第三， 入库层：embedding 后带 metadata（来源/租户/权限/时间）写入向量库，批量入库加失败重试。 **项目里可以这样说：** "我们搭了一套入库 pipeline，抽样式 PDF 召回率比整页塞入提升约 20%。"</span> **<span style="color:#1565C0">2. 怎么保证 
+
+=== 8 ===
+里可以这样说：** "我们搭了一套入库 pipeline，抽样式 PDF 召回率比整页塞入提升约 20%。"</span> **<span style="color:#1565C0">2. 怎么保证 chunk 分割？怎么切的？分块策略是什么？</span>** <span style="background:#E53935;color:#fff;padding:1px 8px;border-radius:8px;font-size:12px">必考</span> > <span style="color:#2E7D32">**先说结论：** 第一， 策略：先按文档结构切（标题/段落），再按字符数截断，块大小 300-500 token，重叠 10%-15%。 第二， 保证：同一语义段落不跨块，代码/表格整块保留。 第三， 验证：抽样标注"切块是否完整表达一个结论"，回测召回效果再调参。 **项目里可以这样说：** "我们对比了固定 512 字符和语义切块，语义切块的召回率高出 12%。"</span> **<span style="color:#1565C0">3. metadata
+
+=== 9 ===
+**项目里可以这样说：** "我们对比了固定 512 字符和语义切块，语义切块的召回率高出 12%。"</span> **<span style="color:#1565C0">3. metadata 元数据里面一般放什么东西？</span>** <span style="background:#E53935;color:#fff;padding:1px 8px;border-radius:8px;font-size:12px">必考</span> > <span style="color:#2E7D32">**先说结论：** 第一， 定位信息：文档 ID、来源文件名、章节路径、页码——用于答案溯源。 第二， 权限信息：租户 ID、权限级别——多租户隔离的关键。 第三， 业务信息：文档类型、更新时间、版本号——便于过滤和版本管理。 **项目里可以这样说：** "metadata 里带 tenant_id，检索时先过滤再向量搜索，这是数据隔离的第一道闸。"</span> **<span style="color:#1565C0">4. RAG 召回率低，怎么调优？完整的调优过程是什么？<
+
+=== 10 ===
+nant_id，检索时先过滤再向量搜索，这是数据隔离的第一道闸。"</span> **<span style="color:#1565C0">4. RAG 召回率低，怎么调优？完整的调优过程是什么？</span>** <span style="background:#E53935;color:#fff;padding:1px 8px;border-radius:8px;font-size:12px">必考</span> > <span style="color:#2E7D32">**先说结论：** 第一， 建评测闭环：先建 100-200 条"问题-期望文档"标注集，量化召回率，避免瞎调。 第二， 检索侧：混合检索（BM25+向量）、加 rerank、换/微调 embedding、查询改写（同义词扩展）。 第三， 数据侧：优化切块、补 metadata 过滤。 第四， 生成侧：prompt 引导、多路召回融合。 **项目里可以这样说：** "我们按这个流程把召回率从 60% 提到 85%，关键是先有评测集。"</span> **<span style="color:#1565C0">5
+
+=== 11 ===
+ 引导、多路召回融合。 **项目里可以这样说：** "我们按这个流程把召回率从 60% 提到 85%，关键是先有评测集。"</span> **<span style="color:#1565C0">5. 稠密检索、稀疏检索、混合检索各自作用？为什么用混合检索？</span>** <span style="background:#E53935;color:#fff;padding:1px 8px;border-radius:8px;font-size:12px">必考</span> > <span style="color:#2E7D32">**先说结论：** 第一， 稠密（向量）：理解语义，适合同义改写，但精确词/专名弱。 第二， 稀疏（BM25/SPLADE）：精确关键词匹配，适合 ID、型号、人名。 第三， 混合：两路召回后用 RRF（倒数排名融合）合并，兼顾语义和精确。 **项目里可以这样说：** "业务里有大量卡牌名、房间号这种精确词，纯向量经常召回错，混检后 Top-5 命中率提升 15%。"</span> **<span style="color:#1565C0">6. E

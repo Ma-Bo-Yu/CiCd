@@ -1,0 +1,14 @@
+{% for m in messages %}
+<div class="message message-{{ m.role }}">
+  <div class="message-role">{{ "你" if m.role == "user" else "助手" }}</div>
+  {% if m.image_url %}
+  <img src="{{ m.image_url }}" alt="上传图片" class="msg-thumb">
+  {% endif %}
+  <div class="message-body">{{ m.content }}</div>
+  {% if m.role == "assistant" and m.citations %}
+  <p class="muted small cite-foot">
+    参考：{% for c in m.citations %}{{ c.document_name }}{% if not loop.last %}、{% endif %}{% endfor %}
+  </p>
+  {% endif %}
+</div>
+{% endfor %}

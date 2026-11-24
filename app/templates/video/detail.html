@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block main_class %} page-video{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb"><a href="/video">讲解视频</a> / {{ job.topic }}</nav>
+
+<header class="video-page-header">
+  <h1>{{ job.topic }}</h1>
+  <div id="job-status-line" class="video-status-row">
+    {% include "video/partials/status_line.html" %}
+  </div>
+</header>
+
+<div class="video-layout">
+  <section class="card video-editor">
+    <div class="video-editor-toolbar">
+      <h2>讲稿编辑</h2>
+      <span class="muted small">Markdown · 保存后可勾选渲染</span>
+    </div>
+    <form method="post" action="/video/{{ job.id }}/script" class="script-form">
+      <textarea name="script_md" rows="22" class="script-area" spellcheck="false">{{ job.script_md or "" }}</textarea>
+      <div class="script-form-actions">
+        <button type="submit" class="btn">保存讲稿</button>
+      </div>
+    </form>
+
+    <form method="post" action="/video/{{ job.id }}/render" class="render-form">
+      <label class="checkbox-row">
+        <input type="checkbox" name="script_confirmed" {% if job.script_confirmed %}checked{% endif %}>
+        我已确认讲稿内容，可以开始渲染
+      </label>
+      <span id="render-btn-state">
+        <button
+          type="submit"
+          id="render-btn"
+          class="btn primary"
+          {% if job.status in ['pending', 'running'] %}disabled data-running="1"{% endif %}
+        >确认并渲染</button>
+      </span>
+    </form>
+  </section>
+
+  <aside class="video-sidebar">
+    <section class="card citations-panel">
+      <h2>参考来源</h2>
+      {% if citations %}
+      <p class="muted small citations-hint">去重后的知识库片段，供核对讲稿依据。</p>
+      <div class="citations-scroll">
+        {% for c in citations %}
+        <article class="citation-card">
+          <strong class="citation-doc-name">{{ c.document_name }}</strong>
+          <p class="small citation-excerpt">{{ c.excerpt }}</p>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="muted small">暂无引用（可能库内无相关内容）。</p>
+      {% endif %}
+    </section>
+
+    <section
+      id="job-progress"
+      class="card render-panel progress-wrap"
+      {% if job.status in ['pending', 'running'] %}
+      hx-get="/video/{{ job.id }}/progress"
+      hx-trigger="every 2s"
+      hx-target="#job-progress-body"
+      hx-swap="innerHTML"
+      {% endif %}
+    >
+      <h2 class="render-panel-title">渲染结果</h2>
+      <div id="job-progress-body">
+        {% include "video/partials/progress_inner.html" %}
+      </div>
+    </section>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    const box = document.querySelector('input[name="script_confirmed"]');
+    const btn = document.getElementById("render-btn");
+    if (!box || !btn) return;
+    function sync() {
+      if (btn.hasAttribute("data-running")) return;
+      btn.disabled = !box.checked;
+    }
+    box.addEventListener("change", sync);
+    if (["pending", "running"].includes("{{ job.status }}")) {
+      btn.setAttribute("data-running", "1");
+      btn.disabled = true;
+    }
+    sync();
+    document.body.addEventListener("htmx:afterSwap", function (ev) {
+      const tid = ev.detail.target && ev.detail.target.id;
+      if (tid === "job-progress-body" || tid === "job-progress") {
+        const b = document.getElementById("render-btn");
+        const c = document.querySelector('input[name="script_confirmed"]');
+        if (b && c && !b.hasAttribute("data-running")) {
+          b.disabled = !c.checked;
+        }
+      }
+    });
+  })();
+</script>
+{% endblock %}

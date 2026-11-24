@@ -1,0 +1,32 @@
+<section class="card">
+  <h2>步骤时间线</h2>
+  <ol class="timeline">
+    {% for s in steps %}
+    <li class="timeline-item status-{{ s.status }}">
+      <strong>{{ s.name }}</strong>
+      <span class="muted small">{{ s.detail }}</span>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+
+{% if job.report_md %}
+<section class="card">
+  <h2>报告预览</h2>
+  <pre class="report-preview">{{ job.report_md }}</pre>
+  {% if ingested_doc %}
+  <p class="flash flash-info" role="status">
+    知识库中已有该报告，无需再次「一键入库」。
+    文档：<strong>{{ ingested_doc.filename }}</strong>（{{ ingested_doc.status }}）
+  </p>
+  <a class="btn" href="/kb/{{ job.kb_id }}">打开知识库查看</a>
+  {% else %}
+  <form method="post" action="/research/{{ job.id }}/ingest">
+    <button type="submit" class="btn primary">一键入库</button>
+  </form>
+  <p class="muted small">将报告保存为 Markdown 文档并重新索引，供问答检索。</p>
+  {% endif %}
+</section>
+{% elif job.status in ['pending', 'running'] %}
+<p class="muted">研究进行中，请稍候…</p>
+{% endif %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block main_class %} page-chat{% endblock %}
+
+{% block content %}
+<header class="page-header">
+  <h1>AI 对话</h1>
+  <p class="lead">开放文字对话，不单独检索知识库。可在输入框<strong>粘贴图片</strong>（Ctrl+V）或点 📎 选图识图（默认 vision_rag，使用当前全局知识库）。库内问答请用 <a href="/chat">知识库问答</a>。</p>
+</header>
+
+{% if not knowledge_bases %}
+<p class="empty-state">请先 <a href="/kb">创建知识库</a>（会话需关联知识库记录）。</p>
+{% else %}
+<div class="chat-layout">
+  <aside class="chat-sidebar card">
+    <form method="post" action="/chat/ai/sessions">
+      <input type="hidden" name="kb_id" value="{{ kb_id }}">
+      <button type="submit" class="btn primary full-width">新对话</button>
+    </form>
+
+    {% set list_base = "/chat/ai" %}
+    {% include "chat/partials/session_list.html" %}
+  </aside>
+
+  <section class="chat-main card">
+    {% if current_session %}
+    <div id="message-list" class="message-list">
+      {% include "chat/partials/messages.html" %}
+    </div>
+
+    <form
+      class="chat-input ai-composer"
+      data-stream-url="/chat/ai/sessions/{{ current_session.id }}/messages/stream"
+      data-messages-url="/chat/ai/sessions/{{ current_session.id }}/messages-fragment"
+      data-vision-stream-url="/chat/ai/sessions/{{ current_session.id }}/messages/vision/stream"
+      data-vision-mode="vision_rag"
+      action="/chat/ai/sessions/{{ current_session.id }}/messages/stream"
+      method="post"
+    >
+      <div class="composer-preview" data-paste-preview hidden></div>
+      <div class="ai-composer-row">
+        <label class="btn composer-attach-btn" title="选择图片">
+          📎
+          <input type="file" name="image" accept="image/png,image/jpeg,image/webp">
+        </label>
+        <textarea name="content" rows="2" placeholder="例如：帮我润色这段面试回答；或粘贴截图（Ctrl+V）识图" autocomplete="off"></textarea>
+        <button type="submit" class="btn primary">发送</button>
+      </div>
+    </form>
+    {% else %}
+    <p class="empty-state">点击「新对话」开始。</p>
+    {% endif %}
+  </section>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/chat-stream.js?v=11"></script>
+<script>window.bootChatStream && window.bootChatStream();</script>
+{% endblock %}

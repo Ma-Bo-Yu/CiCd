@@ -1,0 +1,22 @@
+{% if job.status == 'succeeded' and job.output_video_path %}
+<div class="render-result render-result--ok">
+  <p class="render-result-title">渲染完成</p>
+  <p class="muted small">可下载 mp4 在本地播放或答辩演示。</p>
+  <a class="btn primary render-download-btn" href="/api/v1/video/jobs/{{ job.id }}/download">下载 mp4</a>
+</div>
+{% elif job.status == 'failed' %}
+<div class="render-result render-result--fail">
+  <p class="render-result-title danger-text">渲染失败</p>
+  <p class="muted small">{{ job.error_message or "未知错误" }}。讲稿已保留，可修改后重新勾选并渲染。</p>
+</div>
+{% elif job.status in ['pending', 'running'] %}
+<div class="render-result render-result--busy">
+  <p class="render-result-title">正在渲染…</p>
+  <p class="muted small">合成配音与画面，通常需 1～5 分钟，请勿关闭页面。</p>
+  <div class="progress-bar" aria-hidden="true"><div class="progress-bar-fill"></div></div>
+</div>
+{% else %}
+<div class="render-result render-result--idle">
+  <p class="muted small">编辑左侧讲稿，勾选确认后即可开始渲染。</p>
+</div>
+{% endif %}

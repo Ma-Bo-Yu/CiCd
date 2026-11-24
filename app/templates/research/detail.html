@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<nav class="breadcrumb"><a href="/research">研究任务</a> / {{ job.topic }}</nav>
+{% if notice == 'ingested' %}
+<p class="flash flash-success" role="status">报告已入库，正在后台建立索引，可在<a href="/kb/{{ job.kb_id }}">知识库文档列表</a>中查看。</p>
+{% elif notice == 'already_ingested' %}
+<p class="flash flash-success" role="status">知识库中已有该研究报告（<strong>{{ ingested_doc.filename if ingested_doc else '同名文档' }}</strong>），无需重复入库。</p>
+{% elif ingested_doc %}
+<p class="flash flash-info" role="status">提示：当前知识库中已存在本任务对应报告 <strong>{{ ingested_doc.filename }}</strong>（{{ ingested_doc.status }}）。<a href="/kb/{{ job.kb_id }}">在知识库中打开</a></p>
+{% endif %}
+<h1>{{ job.topic }}</h1>
+<p class="muted">状态：<strong>{{ job.status }}</strong>
+  {% if job.error_message %} — {{ job.error_message }}{% endif %}
+</p>
+
+<div
+  id="research-panel"
+  {% if job.status in ['pending', 'running'] %}
+  hx-get="/research/{{ job.id }}/panel"
+  hx-trigger="every 2s"
+  hx-swap="innerHTML"
+  {% endif %}
+>
+  {% include "research/partials/panel.html" %}
+</div>
+{% endblock %}

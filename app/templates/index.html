@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+  <h1>AI 学习知识工作台</h1>
+  <p class="lead">
+    上传面试/理论题 Markdown → <strong>知识库问答</strong>（RAG 带引用）→ <strong>AI 对话</strong>（可粘贴识图）→ 研究报告 → 讲稿确认后渲染讲解视频。同一知识库内可走完演示路径。
+  </p>
+  {% if current_kb %}
+  <p class="muted small">当前推荐知识库：<strong>{{ current_kb.name }}</strong></p>
+  {% endif %}
+</section>
+
+<section class="card-grid">
+  <article class="card">
+    <h2>知识库</h2>
+    <p>创建知识库并上传 PDF / Markdown，完成切片与向量索引。</p>
+    <a href="/kb" class="btn primary">进入知识库</a>
+  </article>
+  <article class="card">
+    <h2>知识库问答</h2>
+    <p>仅检索当前知识库作答，附带可溯源引用；库内无相关内容时不编造答案。</p>
+    <a href="/chat" class="btn primary">开始问答</a>
+  </article>
+  <article class="card">
+    <h2>AI 对话</h2>
+    <p>开放文字对话；输入框可 <strong>粘贴或上传图片</strong> 识图（默认可结合当前知识库）。</p>
+    <a href="/chat/ai" class="btn primary">打开 AI 对话</a>
+  </article>
+  <article class="card">
+    <h2>研究 Agent</h2>
+    <p>库内多步检索，生成 Markdown 报告并支持一键入库。</p>
+    <a href="/research" class="btn primary">研究任务</a>
+  </article>
+  <article class="card">
+    <h2>讲解视频</h2>
+    <p>按主题生成讲稿，确认后百炼 TTS + 幻灯片 + FFmpeg 合成 mp4。</p>
+    <a href="/video" class="btn primary">视频任务</a>
+  </article>
+</section>
+
+<section class="card">
+  <h2>快速开始</h2>
+  <p>
+    第一次使用：点击下方按钮，或到 <a href="/settings">设置</a> 页，一键导入桌面「理论题」文件夹中的面试 Markdown（复盘、面试题整理等）。
+    知识库里文档显示为<strong>已索引</strong>后，即可试 <a href="/chat">知识库问答</a>、<a href="/chat/ai">AI 对话</a> 与 <a href="/video">讲解视频</a>。
+    需要联网大模型、向量检索或配音时，请在项目 <code>.env</code> 中配置相应 API Key。
+  </p>
+  <button type="button" class="btn" data-seed-demo>导入理论题示例资料</button>
+</section>
+
+<section class="status-panel">
+  <h2>服务状态</h2>
+  <div id="health-status" class="health-box">检测中…</div>
+</section>
+{% endblock %}

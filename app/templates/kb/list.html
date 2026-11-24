@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+  <h1>知识库</h1>
+  <p class="lead">创建与管理个人知识库，上传 PDF / Markdown 并建立向量索引。</p>
+</div>
+
+<section class="card form-card">
+  <h2>新建知识库</h2>
+  <form
+    class="kb-form"
+    hx-post="/kb"
+    hx-target="#kb-table"
+    hx-swap="innerHTML"
+  >
+    <label>
+      名称 <span class="required">*</span>
+      <input type="text" name="name" required maxlength="200" placeholder="例如：理论题面试知识库">
+    </label>
+    <label>
+      描述
+      <textarea name="description" rows="2" placeholder="例如：复盘、面试题整理、AI 相关面试 Markdown"></textarea>
+    </label>
+    <button type="submit" class="btn primary">创建</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>知识库列表</h2>
+  <div id="kb-table">
+    {% include "kb/partials/table.html" %}
+  </div>
+</section>
+{% endblock %}
