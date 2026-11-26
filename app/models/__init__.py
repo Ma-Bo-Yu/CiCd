@@ -4,6 +4,7 @@ from app.models.chunk import Chunk
 from app.models.document import Document, DocumentStatus
 from app.models.knowledge_base import KnowledgeBase
 from app.models.research import ResearchJob
+from app.models.payment import PaymentOrder
 from app.models.usage import UsageEvent
 from app.models.user import User
 from app.models.video import VideoJob
@@ -16,6 +17,7 @@ __all__ = [
     "DocumentStatus",
     "KnowledgeBase",
     "Message",
+    "PaymentOrder",
     "ResearchJob",
     "SessionMode",
     "UsageEvent",

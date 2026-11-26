@@ -35,7 +35,6 @@ from app.services.billing import (
     PLAN_LABELS,
     PRO_DAYS,
     PRO_PRICE_CNY,
-    activate_pro,
     assert_can_create_kb,
     assert_can_create_research,
     assert_can_create_video,
@@ -1285,12 +1284,19 @@ def billing_page(
     user: User = Depends(require_user),
     quota: str | None = Query(None),
 ):
-    snap = usage_snapshot(db, user)
-    quota_msg = None
-    if quota:
-        from app.services.billing import QUOTA_MESSAGES
+    from app.models.payment import PaymentOrder
+    from app.services.billing import QUOTA_MESSAGES
 
-        quota_msg = QUOTA_MESSAGES.get(quota, "已达套餐配额上限，请升级专业版")
+    snap = usage_snapshot(db, user)
+    quota_msg = QUOTA_MESSAGES.get(quota) if quota else None
+    recent_orders = list(
+        db.scalars(
+            select(PaymentOrder)
+            .where(PaymentOrder.user_id == user.id)
+            .order_by(PaymentOrder.created_at.desc())
+            .limit(5)
+        ).all()
+    )
     return _render(
         request,
         "billing/index.html",
@@ -1302,17 +1308,88 @@ def billing_page(
         pro_price=PRO_PRICE_CNY,
         pro_days=PRO_DAYS,
         quota_msg=quota_msg,
+        recent_orders=recent_orders,
     )
 
 
-@router.post("/billing/upgrade")
-def billing_upgrade(
+@router.post("/billing/checkout")
+def billing_checkout(
     db: Session = Depends(get_db),
     user: User = Depends(require_user),
 ):
-    activate_pro(user)
+    """创建沙箱订单并进入收银台（对齐真实支付：先下单再支付）。"""
+    from app.services.payment_sandbox import create_pro_order
+
+    order = create_pro_order(db, user)
+    db.commit()
+    return RedirectResponse(
+        url=f"/billing/sandbox/{order.id}",
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+
+@router.get("/billing/sandbox/{order_id}")
+def billing_sandbox_checkout(
+    order_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_user),
+):
+    from app.services.payment_sandbox import get_order_for_user
+
+    order = get_order_for_user(db, order_id, user)
+    return _render(
+        request,
+        "billing/sandbox_checkout.html",
+        user,
+        page_title="沙箱收银台",
+        order=order,
+        pro_days=PRO_DAYS,
+    )
+
+
+@router.post("/billing/sandbox/{order_id}/pay-success")
+def billing_sandbox_pay_success(
+    order_id: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_user),
+):
+    from app.services.payment_sandbox import get_order_for_user, sandbox_pay_success
+
+    order = get_order_for_user(db, order_id, user)
+    sandbox_pay_success(db, order, user)
     db.commit()
     return RedirectResponse(url="/billing?upgraded=1", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/billing/sandbox/{order_id}/pay-fail")
+def billing_sandbox_pay_fail(
+    order_id: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_user),
+):
+    from app.services.payment_sandbox import get_order_for_user, sandbox_pay_fail
+
+    order = get_order_for_user(db, order_id, user)
+    sandbox_pay_fail(db, order, user)
+    db.commit()
+    return RedirectResponse(url="/billing?pay_failed=1", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/billing/sandbox/{order_id}/cancel")
+def billing_sandbox_cancel(
+    order_id: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_user),
+):
+    from app.services.payment_sandbox import get_order_for_user, sandbox_cancel
+
+    order = get_order_for_user(db, order_id, user)
+    sandbox_cancel(db, order, user)
+    db.commit()
+    return RedirectResponse(
+        url="/billing?pay_cancelled=1", status_code=status.HTTP_303_SEE_OTHER
+    )
 
 
 @router.post("/billing/downgrade")

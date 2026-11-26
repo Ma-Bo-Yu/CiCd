@@ -2,13 +2,19 @@
 
 {% block content %}
 <h1>套餐与用量</h1>
-<p class="muted">演示级个人订阅：无真实支付。超额创建会被拦截并引导到本页升级。</p>
+<p class="muted">升级走<strong>支付沙箱</strong>（下单 → 收银台 → 回调开通），不接微信/支付宝真扣款。</p>
 
 {% if quota_msg %}
 <p class="flash flash-error" role="alert">{{ quota_msg }}</p>
 {% endif %}
 {% if request.query_params.get('upgraded') %}
-<p class="flash flash-success" role="status">已模拟开通专业版（{{ pro_days }} 天）。</p>
+<p class="flash flash-success" role="status">沙箱支付成功，已开通专业版（{{ pro_days }} 天）。</p>
+{% endif %}
+{% if request.query_params.get('pay_failed') %}
+<p class="flash flash-error" role="alert">沙箱支付失败，套餐未变更。</p>
+{% endif %}
+{% if request.query_params.get('pay_cancelled') %}
+<p class="flash flash-info" role="status">已取消支付。</p>
 {% endif %}
 {% if request.query_params.get('downgraded') %}
 <p class="flash flash-info" role="status">已恢复为免费版。</p>
@@ -63,7 +69,7 @@
   </article>
   <article class="card card-accent">
     <h2>专业版</h2>
-    <p class="price">¥{{ pro_price }} <span class="muted">/ 月（模拟）</span></p>
+    <p class="price">¥{{ pro_price }} <span class="muted">/ 月</span></p>
     <ul>
       <li>知识库 {{ plans.pro.kb }} 个</li>
       <li>文档 {{ plans.pro.docs }} 篇</li>
@@ -73,12 +79,26 @@
     {% if snap.plan == 'pro' %}
     <p class="muted small">已开通</p>
     {% else %}
-    <form method="post" action="/billing/upgrade">
-      <button type="submit" class="btn primary">模拟开通专业版（{{ pro_days }} 天）</button>
+    <form method="post" action="/billing/checkout">
+      <button type="submit" class="btn primary">去沙箱支付（¥{{ pro_price }}）</button>
     </form>
     {% endif %}
   </article>
 </section>
 
-<p class="muted small">说明：本页仅用于产品与答辩演示，不接入微信/支付宝等真实支付。</p>
+{% if recent_orders %}
+<section class="card">
+  <h2>最近订单（沙箱）</h2>
+  <ul class="usage-list">
+    {% for o in recent_orders %}
+    <li>
+      <span class="small">{{ o.created_at.strftime('%m-%d %H:%M') }} · {{ o.id[:8] }}…</span>
+      <strong>{{ o.status }} · ¥{{ '%.2f'|format(o.amount_cents / 100) }}</strong>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<p class="muted small">说明：沙箱用于演示真实支付链路；接微信/支付宝时替换收银台与回调即可，订单与开通逻辑可复用。</p>
 {% endblock %}

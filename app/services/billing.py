@@ -1,4 +1,4 @@
-"""演示级个人套餐与配额（无真支付）。"""
+"""个人套餐与配额。升级走支付沙箱订单（见 payment_sandbox），无微信/支付宝真扣款。"""
 
 from __future__ import annotations
 
